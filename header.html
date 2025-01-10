@@ -29,12 +29,12 @@ html {
 
 /* horizonal button container */
 .button-container {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin: 20px 0;
-            flex-wrap: wrap;
-        }
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin: 20px 0;
+    flex-wrap: wrap;
+}
 
 /* custom audio player */
 .player-container {
@@ -233,41 +233,47 @@ html {
 <script type="text/javascript">
 /* <![CDATA[ */
 class AudioPlayerWidget {
-    constructor(container, audioUrl) {
+    constructor(container, audioUrl, fullPath) {
         this.container = container;
         this.audioUrl = audioUrl;
+        this.fullPath = fullPath;
         this.init();
     }
 
     init() {
-    // Create audio element
-    this.audio = document.createElement('audio');
-    this.audio.src = this.audioUrl;
-    
-    // Keep the existing title and add controls
-    const title = this.container.querySelector('.title');
-    const controlsHtml = `
-        <div class="controls-container">
-            <button class="play-btn">▶<\/button>
-            <span class="time">0:00<\/span>
-            <input type="range" class="time-slider" min="0" max="100" value="0" />
-            <span class="time duration">0:00<\/span>
-        <\/div>
-    `;
-    
-    // Insert controls after the title
-    title.insertAdjacentHTML('afterend', controlsHtml);
-    this.container.appendChild(this.audio);
+        // Create audio element
+        this.audio = document.createElement('audio');
+        if(this.fullPath){
+            this.audio.src = this.audioUrl;
+        } else {
+            this.audio.src = "https://raw.githubusercontent.com/JeremiasMeister/website-mila/main/" + this.audioUrl;
+        }
+        
+        
+        // Keep the existing title and add controls
+        const title = this.container.querySelector('.title');
+        const controlsHtml = `
+            <div class="controls-container">
+                <button class="play-btn">▶<\/button>
+                <span class="time">0:00<\/span>
+                <input type="range" class="time-slider" min="0" max="100" value="0" />
+                <span class="time duration">0:00<\/span>
+            <\/div>
+        `;
+        
+        // Insert controls after the title
+        title.insertAdjacentHTML('afterend', controlsHtml);
+        this.container.appendChild(this.audio);
 
-    // Get elements
-    this.playBtn = this.container.querySelector('.play-btn');
-    this.timeSlider = this.container.querySelector('.time-slider');
-    this.currentTime = this.container.querySelector('.time');
-    this.durationDisplay = this.container.querySelector('.duration');
+        // Get elements
+        this.playBtn = this.container.querySelector('.play-btn');
+        this.timeSlider = this.container.querySelector('.time-slider');
+        this.currentTime = this.container.querySelector('.time');
+        this.durationDisplay = this.container.querySelector('.duration');
 
-    // Bind events
-    this.bindEvents();
-}
+        // Bind events
+        this.bindEvents();
+    }
 
     formatTime(seconds) {
         const minutes = Math.floor(seconds / 60);
@@ -329,9 +335,14 @@ class AudioPlayerWidget {
 }
 
 class VideoPlayerWidget {
-    constructor(container, videoUrl) {
+    constructor(container, videoUrl, fullPath) {
         this.container = container;
-        this.videoUrl = videoUrl;
+        if(fullPath){
+            this.videoUrl = videoUrl;
+        } else {
+            this.videoUrl = "https://raw.githubusercontent.com/JeremiasMeister/website-mila/main/" + videoUrl;
+        }
+        
         this.init();
     }
 
@@ -507,11 +518,11 @@ class VideoPlayerWidget {
 // Initialize all players when the document loads
 document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.custom-audio-player-2024').forEach(container => {
-        new AudioPlayerWidget(container, container.dataset.audioUrl);
+        new AudioPlayerWidget(container, container.dataset.audioUrl, container.dataset.fullPath);
     });
     
     document.querySelectorAll('.custom-video-player-2024').forEach(container => {
-        new VideoPlayerWidget(container, container.dataset.videoUrl);
+        new VideoPlayerWidget(container, container.dataset.videoUrl, container.dataset.fullPath);
     });
     
      // Add scroll handler for navigation opacity
@@ -533,13 +544,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
 /* this is an example usage
 
-<div class="custom-video-player-2024" data-video-url="https://raw.githubusercontent.com/JeremiasMeister/website-mila/main/Ata Robots komplett.mov">
+<div class="custom-video-player-2024" data-video-url="https://raw.githubusercontent.com/JeremiasMeister/website-mila/main/Ata Robots komplett.mov" :data-full-path="true">
     <div class="title">
         Robots Syncro
     </div>
 </div>
 
-<div class="custom-audio-player-2024" data-audio-url="https://raw.githubusercontent.com/JeremiasMeister/website-mila/main/System.mp3">
+<div class="custom-audio-player-2024" data-audio-url="https://raw.githubusercontent.com/JeremiasMeister/website-mila/main/System.mp3" :data-full-path="true">
     <div class="title">
         System
     </div>
