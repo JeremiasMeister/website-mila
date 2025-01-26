@@ -45,7 +45,7 @@
         background: none;
         border: none;
         color: white;
-        font-size: 1.1rem;
+        font-size: 1.5rem;
         cursor: pointer;
         border-bottom: 2px solid transparent;
         white-space: nowrap;
@@ -79,6 +79,10 @@
     }
     
     /* custom audio player */
+    .custom-audio-player-2024 {
+        margin-bottom: 2rem;
+    }
+
     .player-container {
         background: #000000;
         padding: 15px;
@@ -138,6 +142,10 @@
     }
     
     /* custom video player */
+    .custom-video-player-2024 {
+        margin-bottom: 2rem;
+    }
+
     .video-player-container {
         background: #000000;
         padding: 15px;
@@ -145,24 +153,20 @@
         max-width: 800px;
         color: white;
         font-family: Arial, sans-serif;
-        margin: 20px auto;
     }
     
     .video-wrapper {
         position: relative;
-        margin-top: 4px;
         width: 100%;
         padding-top: 56.25%;
-        padding-bottom: 56.25%;
         background: #000;
         cursor: pointer;
     }
     
     .video-wrapper video {
         position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
+        top: 0;
+        left: 0;
         width: 100%;
         height: 100%;
         object-fit: contain;
@@ -181,8 +185,12 @@
         transition: background 0.3s;
     }
     
-    .video-overlay:hover {
-        background: rgba(0, 0, 0, 0.3);
+    .video-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
     }
     
     .video-overlay-play {
@@ -200,7 +208,7 @@
         position: absolute;
         bottom: 0;
         left: 0;
-        right: 0;
+        width: 100%;
         display: flex;
         align-items: center;
         gap: 10px;
@@ -280,10 +288,10 @@
     }
 
     /*]]>*/
-    </style>
-    
-    
-    <script type="text/javascript">
+</style>
+
+
+<script type="text/javascript">
     /* <![CDATA[ */
     let currentlyPlaying = null;
 
@@ -308,11 +316,11 @@
             const description = this.container.querySelector('.player-description');      
             const controlsHtml = `
                 <div class="controls-container">
-                    <button class="play-btn">▶</button>
-                    <span class="time">0:00</span>
+                    <button class="play-btn">▶<\/button>
+                    <span class="time">0:00<\/span>
                     <input type="range" class="time-slider" min="0" max="100" value="0" />
-                    <span class="time duration">0:00</span>
-                </div>
+                    <span class="time duration">0:00<\/span>
+                <\/div>
             `;
             
             if (description) {
@@ -424,17 +432,17 @@
                     <div class="video-overlay">
                         <span class="video-overlay-play">⏵<\/span>
                     <\/div>
-                <\/div>
-                <div class="video-controls">
-                    <button class="video-play-btn">▶<\/button>
-                    <span class="video-time">0:00<\/span>
-                    <input type="range" class="video-time-slider" min="0" max="100" value="0" />
-                    <span class="video-time duration">0:00<\/span>
-                    <div class="volume-container">
-                        <button class="volume-btn">�<\/button>
-                        <input type="range" class="volume-slider" min="0" max="100" value="100" />
+                    <div class="video-controls">
+                        <button class="video-play-btn">▶<\/button>
+                        <span class="video-time">0:00<\/span>
+                        <input type="range" class="video-time-slider" min="0" max="100" value="0" />
+                        <span class="video-time duration">0:00<\/span>
+                        <div class="volume-container">
+                            <button class="volume-btn">�<\/button>
+                            <input type="range" class="volume-slider" min="0" max="100" value="100" />
+                        <\/div>
+                        <button class="fullscreen-btn">⛶<\/button>
                     <\/div>
-                    <button class="fullscreen-btn">⛶<\/button>
                 <\/div>
             `;            
             
@@ -643,5 +651,4 @@
         }
     });
     /*]]>*/
-    </script>
-    
+</script>
