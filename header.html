@@ -68,6 +68,96 @@
         from { opacity: 0; }
         to { opacity: 1; }
     }
+
+    /* logo container */
+        .logo-gallery-container-2024 {
+            width: 100%;
+            margin: 40px auto;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            box-sizing: border-box;
+        }
+
+        .logo-gallery-items-2024 {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 30px;
+        }
+        
+        .custom-logo-item-2024 {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 0px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100px;
+            min-width: 150px;
+            box-sizing: border-box;
+            aspect-ratio: 16 / 9;
+            min-width: 150px;
+            flex-grow: 1;
+            flex-basis: 150px; 
+        }
+
+        .custom-logo-item-2024:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 8px 20px rgba(0, 191, 255, 0.3); /* Hellerer Schatten beim Hover */
+        }
+
+        .custom-logo-item-2024 a {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            text-decoration: none;
+        }
+
+        .custom-logo-item-2024 img {
+            max-width: 150px; 
+            max-height: 80px;
+            height: auto; 
+            display: block;
+            filter: grayscale(80%) opacity(0.8);
+            transition: filter 0.3s ease;
+        }
+
+        .custom-logo-item-2024:hover img {
+            filter: grayscale(0%) opacity(1); /* Volle Farbe beim Hover */
+        }
+
+        /* responsive changes */
+        @media (max-width: 768px) {
+            .logo-gallery-container-2024 h2 {
+                font-size: 1.5rem;
+            }
+            .logo-gallery-items-2024 {
+                gap: 20px;
+            }
+            .custom-logo-item-2024 {
+                padding: 15px;
+                min-width: 120px;
+            }
+            .custom-logo-item-2024 img {
+                max-width: 120px;
+                max-height: 60px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .custom-logo-item-2024 {
+                width: calc(50% - 10px);
+                min-width: unset;
+            }
+             .custom-logo-item-2024 img {
+                max-width: 100px;
+                max-height: 50px;
+            }
+        }
     
     /* horizonal button container */
     .button-container {
@@ -609,6 +699,41 @@
             }
         }
     }
+
+    class LogoItemWidget {
+        constructor(container) {
+            this.container = container;
+            this.imgSrc = this.container.dataset.imgSrc;
+            this.linkUrl = this.container.dataset.linkUrl;
+            this.altText = this.container.dataset.altText || 'Kundenlogo';
+            this.customerName = this.container.dataset.customerName || 'Kunde';
+            this.isFullPath = this.container.dataset.fullPath === 'true';
+            this.init();
+        }
+
+        init() {
+            if (!this.imgSrc || !this.linkUrl) {
+                console.error('Missing data for LogoItemWidget: img-src or link-url not found.', this.container);
+                this.container.innerHTML = '<p style="color:red; font-size:12px;">Fehler: missing image files.<\/p>';
+                return;
+            }
+
+            let finalImgSrc;
+            if (this.isFullPath) {
+                finalImgSrc = this.imgSrc; 
+            } else {
+                finalImgSrc = "https://raw.githubusercontent.com/JeremiasMeister/website-mila/main/" + this.imgSrc;
+            }
+
+            const logoHtml = `
+                <a href="${this.linkUrl}" target="_blank" title="Visit ${this.customerName}">
+                    <img src="${finalImgSrc}" alt="${this.altText}" onerror="this.style.display='none'; console.error('Missing Image: ${finalImgSrc}')">
+                <\/a>
+            `;
+
+            this.container.innerHTML = logoHtml;
+        }
+    }
     
     // Initialize all players when the document loads
     document.addEventListener('DOMContentLoaded', function() {
@@ -635,6 +760,10 @@
         
         document.querySelectorAll('.custom-video-player-2024').forEach(container => {
             new VideoPlayerWidget(container, container.dataset.videoUrl, container.dataset.fullPath);
+        });
+
+        document.querySelectorAll('.custom-logo-item-2024').forEach(container => {
+            new LogoItemWidget(container);
         });
         
          // Add scroll handler for navigation opacity
