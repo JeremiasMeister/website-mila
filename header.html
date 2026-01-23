@@ -761,19 +761,15 @@
             newLink.target = "_blank";
             newLink.rel = "noopener noreferrer";
             
-            // Flex styling for perfect alignment
-            newLink.style.display = "inline-flex"; 
-            newLink.style.alignItems = "center"; 
-            newLink.style.gap = "6px"; // Slightly more gap for the image
-            
+        
             // 4. The Image and Text
             // We use your GitHub link here
             newLink.innerHTML = `
-                <img src="https://raw.githubusercontent.com/JeremiasMeister/website-mila/main/icon-synchronstar.png" 
-                     alt="Synchronstar Icon" 
-                     style="height: 16px; width: auto; vertical-align: middle;">
-                <span>Synchronstar</span>
-            `;
+            <img src="https://raw.githubusercontent.com/JeremiasMeister/website-mila/main/icon-synchronstar.png" 
+                 alt="Synchronstar Icon" 
+                 style="height: 16px; width: auto; margin-right: 5px; vertical-align: -3px;">
+            <span style="position: relative;">Synchronstar<\/span>
+        `;
 
             // 5. Insert before the Copyright line
             var breakTag = metaLinks.querySelector('br');
