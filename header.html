@@ -749,6 +749,43 @@
     // Initialize all players when the document loads
     document.addEventListener('DOMContentLoaded', function() {
         const tabButtons = document.querySelectorAll('.tab-button');
+        var metaLinks = document.querySelector('.j-meta-links');
+
+        if (metaLinks) {
+            // 2. Create the separator
+            var separator = document.createTextNode(' | ');
+
+            // 3. Create the new link element
+            var newLink = document.createElement('a');
+            newLink.href = "https://www.synchronstar.de/intern/detail/mila-arcero/5530";
+            newLink.target = "_blank";
+            newLink.rel = "noopener noreferrer";
+            
+            // Flex styling for perfect alignment
+            newLink.style.display = "inline-flex"; 
+            newLink.style.alignItems = "center"; 
+            newLink.style.gap = "6px"; // Slightly more gap for the image
+            
+            // 4. The Image and Text
+            // We use your GitHub link here
+            newLink.innerHTML = `
+                <img src="https://raw.githubusercontent.com/JeremiasMeister/website-mila/main/icon-synchronstar.png" 
+                     alt="Synchronstar Icon" 
+                     style="height: 16px; width: auto; vertical-align: middle;">
+                <span>Synchronstar</span>
+            `;
+
+            // 5. Insert before the Copyright line
+            var breakTag = metaLinks.querySelector('br');
+            
+            if (breakTag) {
+                metaLinks.insertBefore(separator, breakTag);
+                metaLinks.insertBefore(newLink, breakTag);
+            } else {
+                metaLinks.appendChild(separator);
+                metaLinks.appendChild(newLink);
+            }
+        }
         
         tabButtons.forEach(button => {
             button.addEventListener('click', () => {
