@@ -81,13 +81,15 @@
         }
 
         .logo-gallery-items-2024 {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            align-items: flex-start;
+            display: grid;
+            grid-template-columns: repeat(var(--logo-cols, 5), minmax(0, 1fr));
+            justify-items: center;
+            align-items: center;
             gap: 30px;
+            max-width: 1100px;
+            margin: 0 auto;
         }
-        
+
         .custom-logo-item-2024 {
             background-color: rgba(255, 255, 255, 0.05);
             border-radius: 0px;
@@ -95,13 +97,10 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100px;
-            min-width: 150px;
             box-sizing: border-box;
             aspect-ratio: 16 / 9;
-            min-width: 150px;
-            flex-grow: 1;
-            flex-basis: 150px;
+            width: 100%;
+            max-width: 200px;
         }
         
         .custom-logo-item-2024[data-tile-bg="light"] {
@@ -157,8 +156,7 @@
                 gap: 20px;
             }
             .custom-logo-item-2024 {
-                padding: 15px;
-                min-width: 120px;
+                max-width: 160px;
             }
             .custom-logo-item-2024 img {
                 max-width: 120px;
@@ -168,8 +166,7 @@
 
         @media (max-width: 480px) {
             .custom-logo-item-2024 {
-                width: calc(50% - 10px);
-                min-width: unset;
+                max-width: 140px;
             }
              .custom-logo-item-2024 img {
                 max-width: 100px;
@@ -826,6 +823,21 @@
         document.querySelectorAll('.custom-logo-item-2024').forEach(container => {
             new LogoItemWidget(container);
         });
+
+        function layoutLogoGalleries() {
+            const maxCols = window.innerWidth <= 480 ? 2
+                          : window.innerWidth <= 768 ? 3
+                          : 5;
+            document.querySelectorAll('.logo-gallery-items-2024').forEach(gallery => {
+                const n = gallery.querySelectorAll('.custom-logo-item-2024').length;
+                if (n === 0) return;
+                const rows = Math.ceil(n / maxCols);
+                const cols = Math.max(1, Math.ceil(n / rows));
+                gallery.style.setProperty('--logo-cols', cols);
+            });
+        }
+        layoutLogoGalleries();
+        window.addEventListener('resize', layoutLogoGalleries);
         
          // Add scroll handler for navigation opacity
         const header = document.querySelector('.jtpl-header');
