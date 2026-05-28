@@ -82,12 +82,10 @@
 
         .logo-gallery-items-2024 {
             display: grid;
-            grid-template-columns: repeat(var(--logo-cols, 5), minmax(0, 1fr));
-            justify-items: center;
+            grid-template-columns: repeat(var(--logo-cols, 5), 200px);
+            justify-content: center;
             align-items: center;
             gap: 30px;
-            max-width: 1100px;
-            margin: 0 auto;
         }
 
         .custom-logo-item-2024 {
@@ -100,7 +98,6 @@
             box-sizing: border-box;
             aspect-ratio: 16 / 9;
             width: 100%;
-            max-width: 200px;
         }
         
         .custom-logo-item-2024[data-tile-bg="light"] {
@@ -153,10 +150,8 @@
                 font-size: 1.5rem;
             }
             .logo-gallery-items-2024 {
+                grid-template-columns: repeat(var(--logo-cols, 3), 160px);
                 gap: 20px;
-            }
-            .custom-logo-item-2024 {
-                max-width: 160px;
             }
             .custom-logo-item-2024 img {
                 max-width: 120px;
@@ -165,8 +160,8 @@
         }
 
         @media (max-width: 480px) {
-            .custom-logo-item-2024 {
-                max-width: 140px;
+            .logo-gallery-items-2024 {
+                grid-template-columns: repeat(var(--logo-cols, 2), 140px);
             }
              .custom-logo-item-2024 img {
                 max-width: 100px;
