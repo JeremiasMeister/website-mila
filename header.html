@@ -73,8 +73,6 @@
     /* logo container */
         .logo-gallery-container-2024 {
             width: 100%;
-            margin: 40px auto;
-            padding: 20px;
             max-width: 1200px;
             margin: 0 auto;
             box-sizing: border-box;
@@ -88,7 +86,33 @@
             gap: 30px;
         }
 
-        .custom-logo-item-2024 {
+        /* Cycling gallery — 3 fixed slots that rotate through the source list */
+        .logo-gallery-cycling-2024 {
+            display: grid;
+            grid-template-columns: repeat(3, 200px);
+            justify-content: start;
+            align-items: center;
+            gap: 30px;
+        }
+        .logo-source-list { display: none; }
+
+        .cycling-slot img {
+            transition: opacity 220ms cubic-bezier(0.4, 0, 1, 1);
+        }
+        .cycling-slot img.is-in {
+            transition: opacity 220ms cubic-bezier(0, 0, 0.2, 1);
+        }
+        .cycling-slot img.fading {
+            opacity: 0;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .cycling-slot img,
+            .cycling-slot img.is-in {
+                transition: none;
+            }
+        }
+
+        .custom-logo-item-2024, .cycling-slot {
             background-color: rgba(255, 255, 255, 0.05);
             border-radius: 0px;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -100,22 +124,26 @@
             width: 100%;
         }
         
-        .custom-logo-item-2024[data-tile-bg="light"] {
+        .custom-logo-item-2024[data-tile-bg="light"],
+        .cycling-slot[data-tile-bg="light"] {
             background-color: rgba(255, 255, 255, 1);
         }
 
-        .custom-logo-item-2024:hover {
+        .custom-logo-item-2024:hover,
+        .cycling-slot:hover {
             transform: translateY(-5px) scale(1.05);
             box-shadow: 0 8px 20px rgba(191, 191, 191, 0.3); /* Hellerer Schatten beim Hover */
         }
-        
-        .custom-logo-item-2024[data-tile-bg="light"]:hover {
+
+        .custom-logo-item-2024[data-tile-bg="light"]:hover,
+        .cycling-slot[data-tile-bg="light"]:hover {
             transform: translateY(-5px) scale(1.05);
             box-shadow: 0 8px 20px rgba(191, 191, 191, 0.3); /* Hellerer Schatten beim Hover */
             background-color: rgba(217, 217, 217, 1);
         }
 
-        .custom-logo-item-2024 a {
+        .custom-logo-item-2024 a,
+        .cycling-slot a {
             display: flex;
             justify-content: center;
             align-items: center;
@@ -124,23 +152,29 @@
             text-decoration: none;
         }
 
-        .custom-logo-item-2024 img {
+        .custom-logo-item-2024 img,
+        .cycling-slot img {
             max-width: 150px;
             max-height: 80px;
             height: auto;
             display: block;
             filter: grayscale(80%) opacity(0.8);
+        }
+        .custom-logo-item-2024 img {
             transition: filter 0.3s ease;
         }
-        
-        .custom-logo-item-2024[data-tile-bg="light"] img {
+
+        .custom-logo-item-2024[data-tile-bg="light"] img,
+        .cycling-slot[data-tile-bg="light"] img {
             filter: none;
         }
-        .custom-logo-item-2024:hover img {
+        .custom-logo-item-2024:hover img,
+        .cycling-slot:hover img {
             filter: grayscale(0%) opacity(1); /* Volle Farbe beim Hover */
         }
-        
-        .custom-logo-item-2024[data-tile-bg="light"]:hover img {
+
+        .custom-logo-item-2024[data-tile-bg="light"]:hover img,
+        .cycling-slot[data-tile-bg="light"]:hover img {
             filter: none;
         }
 
@@ -153,9 +187,28 @@
                 grid-template-columns: repeat(var(--logo-cols, 3), 160px);
                 gap: 20px;
             }
-            .custom-logo-item-2024 img {
+            .logo-gallery-cycling-2024 {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                max-width: 540px;
+                gap: 20px;
+            }
+            .custom-logo-item-2024 img,
+            .cycling-slot img {
                 max-width: 120px;
                 max-height: 60px;
+            }
+        }
+
+        /* Stack to a single column once 3-across gets too cramped */
+        @media (max-width: 540px) {
+            .logo-gallery-cycling-2024 {
+                grid-template-columns: minmax(0, 1fr);
+                max-width: 280px;
+                gap: 16px;
+            }
+            .cycling-slot img {
+                max-width: 150px;
+                max-height: 80px;
             }
         }
 
@@ -163,7 +216,7 @@
             .logo-gallery-items-2024 {
                 grid-template-columns: repeat(var(--logo-cols, 2), 140px);
             }
-             .custom-logo-item-2024 img {
+            .custom-logo-item-2024 img {
                 max-width: 100px;
                 max-height: 50px;
             }
@@ -754,6 +807,98 @@
             this.container.innerHTML = logoHtml;
         }
     }
+
+    class LogoGalleryCyclingWidget {
+        constructor(container) {
+            this.container = container;
+            this.slotCount = parseInt(container.dataset.slots, 10) || 3;
+            this.fadeMs = parseInt(container.dataset.fadeMs, 10) || 220;
+            this.blankMs = parseInt(container.dataset.blankMs, 10) || 130;
+            this.swapMs = parseInt(container.dataset.swapMs, 10) || 4500;
+            this.staggerMs = parseInt(container.dataset.staggerMs, 10) || 1500;
+            this.sources = this.collectSources();
+            this.slots = [];
+            this.paused = false;
+            this.init();
+        }
+
+        collectSources() {
+            const list = this.container.parentElement && this.container.parentElement.querySelector('.logo-source-list');
+            if (!list) return [];
+            return Array.from(list.querySelectorAll('.logo-source-item')).map(el => ({
+                imgSrc: el.dataset.imgSrc,
+                linkUrl: el.dataset.linkUrl,
+                altText: el.dataset.altText || 'Kundenlogo',
+                customerName: el.dataset.customerName || 'Kunde',
+                isFullPath: el.dataset.fullPath === 'true',
+                tileBg: el.dataset.tileBg || 'light'
+            }));
+        }
+
+        resolveSrc(s) {
+            return s.isFullPath ? s.imgSrc : "https://raw.githubusercontent.com/JeremiasMeister/website-mila/main/" + s.imgSrc;
+        }
+
+        init() {
+            if (this.sources.length === 0) {
+                console.error('LogoGalleryCyclingWidget: no .logo-source-item entries found.');
+                return;
+            }
+            const visible = Math.min(this.slotCount, this.sources.length);
+            this.container.innerHTML = '';
+            for (let i = 0; i < visible; i++) {
+                const slotEl = document.createElement('div');
+                slotEl.className = 'cycling-slot';
+                const a = document.createElement('a');
+                a.target = '_blank';
+                a.rel = 'noopener noreferrer';
+                const img = document.createElement('img');
+                img.onerror = function () { this.style.display = 'none'; };
+                a.appendChild(img);
+                slotEl.appendChild(a);
+                this.container.appendChild(slotEl);
+                this.slots.push({ el: slotEl, anchor: a, img: img, idx: i });
+                this.render(i);
+            }
+
+            this.container.addEventListener('mouseenter', () => this.paused = true);
+            this.container.addEventListener('mouseleave', () => this.paused = false);
+
+            if (this.sources.length <= visible) return;
+
+            for (let i = 0; i < visible; i++) {
+                setTimeout(() => {
+                    this.advance(i);
+                    setInterval(() => this.advance(i), this.swapMs);
+                }, this.staggerMs * i + 1200);
+            }
+        }
+
+        render(slotIdx) {
+            const slot = this.slots[slotIdx];
+            const src = this.sources[slot.idx];
+            slot.el.dataset.tileBg = src.tileBg;
+            slot.anchor.href = src.linkUrl;
+            slot.anchor.title = 'Visit ' + src.customerName;
+            slot.img.src = this.resolveSrc(src);
+            slot.img.alt = src.altText;
+        }
+
+        advance(slotIdx) {
+            if (this.paused) return;
+            const slot = this.slots[slotIdx];
+            slot.img.classList.remove('is-in');
+            slot.img.classList.add('fading');
+            setTimeout(() => {
+                slot.idx = (slot.idx + this.slots.length) % this.sources.length;
+                this.render(slotIdx);
+                setTimeout(() => {
+                    slot.img.classList.add('is-in');
+                    slot.img.classList.remove('fading');
+                }, this.blankMs);
+            }, this.fadeMs);
+        }
+    }
     
     // Initialize all players when the document loads
     document.addEventListener('DOMContentLoaded', function() {
@@ -817,6 +962,10 @@
 
         document.querySelectorAll('.custom-logo-item-2024').forEach(container => {
             new LogoItemWidget(container);
+        });
+
+        document.querySelectorAll('.logo-gallery-cycling-2024').forEach(container => {
+            new LogoGalleryCyclingWidget(container);
         });
 
         function layoutLogoGalleries() {
