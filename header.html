@@ -406,25 +406,10 @@
 
     .pdf-actions {
         display: flex;
-        gap: 10px;
-        margin: 8px 0 12px 0;
+        gap: 20px;
+        margin: 8px 0 16px 0;
         flex-wrap: wrap;
-    }
-
-    .pdf-action-btn {
-        color: white;
-        text-decoration: none;
-        font-size: 12px;
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        padding: 6px 12px;
-        background: transparent;
-        cursor: pointer;
-        transition: background 0.2s ease, border-color 0.2s ease;
-    }
-
-    .pdf-action-btn:hover {
-        background: rgba(255, 255, 255, 0.08);
-        border-color: rgba(255, 255, 255, 0.6);
+        align-items: center;
     }
 
     .pdf-pages {
@@ -837,8 +822,7 @@
 
             const viewerHtml = `
                 <div class="pdf-actions">
-                    <a class="pdf-action-btn" href="${this.pdfUrl}" download>Download</a>
-                    <a class="pdf-action-btn" href="${this.pdfUrl}" target="_blank" rel="noopener">In neuem Tab öffnen</a>
+                    <a class="j-calltoaction-link j-calltoaction-link-style-1" data-action="button" href="${this.pdfUrl}" download data-title="Download">Download</a>
                 </div>
                 <div class="pdf-pages">
                     <div class="pdf-loading">Lade PDF…</div>
