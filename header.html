@@ -397,9 +397,67 @@
         line-height: 1.4;
     }
 
+    /* pdf viewer widget */
+    .custom-pdf-viewer-2024 {
+        margin-bottom: 2rem;
+        width: 100%;
+        max-width: 800px;
+    }
+
+    .pdf-actions {
+        display: flex;
+        gap: 10px;
+        margin: 8px 0 12px 0;
+        flex-wrap: wrap;
+    }
+
+    .pdf-action-btn {
+        color: white;
+        text-decoration: none;
+        font-size: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        padding: 6px 12px;
+        background: transparent;
+        cursor: pointer;
+        transition: background 0.2s ease, border-color 0.2s ease;
+    }
+
+    .pdf-action-btn:hover {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.6);
+    }
+
+    .pdf-pages {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        background: #000;
+        width: 100%;
+    }
+
+    .pdf-pages canvas {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+
+    .pdf-loading,
+    .pdf-error {
+        color: #ccc;
+        font-size: 12px;
+        padding: 12px 0;
+    }
+
     /*]]>*/
 </style>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script type="text/javascript">
+    if (typeof pdfjsLib !== 'undefined') {
+        pdfjsLib.GlobalWorkerOptions.workerSrc =
+            'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+</script>
 
 <script type="text/javascript">
     /* <![CDATA[ */
@@ -755,6 +813,91 @@
         }
     }
     
+    class PdfViewerWidget {
+        constructor(container, pdfUrl, fullPath) {
+            this.container = container;
+            this.fullPath = (fullPath === 'true' || fullPath === true);
+            if (this.fullPath) {
+                this.pdfUrl = pdfUrl;
+            } else {
+                this.pdfUrl = "https://raw.githubusercontent.com/JeremiasMeister/website-mila/main/" + pdfUrl;
+            }
+            this.init();
+        }
+
+        init() {
+            if (!this.pdfUrl || this.pdfUrl.endsWith('/')) {
+                console.error('Missing data for PdfViewerWidget: pdf-url not found.', this.container);
+                this.container.innerHTML = '<p style="color:red; font-size:12px;">Fehler: PDF URL fehlt.</p>';
+                return;
+            }
+
+            const title = this.container.querySelector('.title');
+            const description = this.container.querySelector('.player-description');
+
+            const viewerHtml = `
+                <div class="pdf-actions">
+                    <a class="pdf-action-btn" href="${this.pdfUrl}" download>Download</a>
+                    <a class="pdf-action-btn" href="${this.pdfUrl}" target="_blank" rel="noopener">In neuem Tab öffnen</a>
+                </div>
+                <div class="pdf-pages">
+                    <div class="pdf-loading">Lade PDF…</div>
+                </div>
+            `;
+
+            if (description) {
+                description.insertAdjacentHTML('afterend', viewerHtml);
+            } else if (title) {
+                title.insertAdjacentHTML('afterend', viewerHtml);
+            } else {
+                this.container.insertAdjacentHTML('afterbegin', viewerHtml);
+            }
+
+            this.pagesContainer = this.container.querySelector('.pdf-pages');
+            this.loadAndRender();
+        }
+
+        showMessage(text, className) {
+            this.pagesContainer.innerHTML =
+                '<div class="' + className + '">' + text + '</div>';
+        }
+
+        async loadAndRender() {
+            if (typeof pdfjsLib === 'undefined') {
+                this.showMessage('PDF-Viewer konnte nicht geladen werden.', 'pdf-error');
+                return;
+            }
+
+            try {
+                const pdf = await pdfjsLib.getDocument(this.pdfUrl).promise;
+                this.pagesContainer.innerHTML = '';
+
+                const containerWidth = this.pagesContainer.clientWidth || 770;
+                const dpr = window.devicePixelRatio || 1;
+
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const unscaled = page.getViewport({ scale: 1 });
+                    const fitScale = containerWidth / unscaled.width;
+                    const viewport = page.getViewport({ scale: fitScale * dpr });
+
+                    const canvas = document.createElement('canvas');
+                    canvas.width = viewport.width;
+                    canvas.height = viewport.height;
+                    this.pagesContainer.appendChild(canvas);
+
+                    await page.render({
+                        canvasContext: canvas.getContext('2d'),
+                        viewport: viewport
+                    }).promise;
+                }
+            } catch (err) {
+                console.error('PDF load error:', err);
+                this.showMessage('Vita konnte nicht geladen werden.', 'pdf-error');
+            }
+        }
+    }
+
     // Initialize all players when the document loads
     document.addEventListener('DOMContentLoaded', function() {
         const tabButtons = document.querySelectorAll('.tab-button');
@@ -817,6 +960,10 @@
 
         document.querySelectorAll('.custom-logo-item-2024').forEach(container => {
             new LogoItemWidget(container);
+        });
+
+        document.querySelectorAll('.custom-pdf-viewer-2024').forEach(container => {
+            new PdfViewerWidget(container, container.dataset.pdfUrl, container.dataset.fullPath);
         });
 
         function layoutLogoGalleries() {
