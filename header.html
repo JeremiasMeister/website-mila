@@ -250,7 +250,31 @@
         color: #ccc;
         min-width: 40px;
     }
-    
+
+    .download-btn {
+        color: white;
+        cursor: pointer;
+        width: 30px;
+        height: 30px;
+        flex-shrink: 0;
+        box-sizing: border-box;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0.7;
+        user-select: none;
+    }
+
+    .download-btn svg {
+        display: block;
+        width: 16px;
+        height: 16px;
+    }
+
+    .download-btn:hover {
+        opacity: 1;
+    }
+
     /* custom video player */
     .custom-video-player-2024 {
         margin-bottom: 2rem;
@@ -436,12 +460,16 @@
     /*]]>*/
 </style>
 
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
 <script type="text/javascript">
+//<![CDATA[
     if (typeof pdfjsLib !== 'undefined') {
         pdfjsLib.GlobalWorkerOptions.workerSrc =
             'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
     }
+//]]>
 </script>
 
 <script type="text/javascript">
@@ -473,6 +501,11 @@
                     <span class="time">0:00<\/span>
                     <input type="range" class="time-slider" min="0" max="100" value="0" />
                     <span class="time duration">0:00<\/span>
+                    <span class="download-btn" title="Download" role="button" tabindex="0" aria-label="Download">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M8 2v8M4.5 6.5L8 10l3.5-3.5M3 13.5h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                        <\/svg>
+                    <\/span>
                 <\/div>
             `;
             
@@ -488,6 +521,7 @@
             this.timeSlider = this.container.querySelector('.time-slider');
             this.currentTime = this.container.querySelector('.time');
             this.durationDisplay = this.container.querySelector('.duration');
+            this.downloadBtn = this.container.querySelector('.download-btn');
 
             this.bindEvents();
         }
@@ -557,6 +591,29 @@
                 console.error('Error loading audio');
                 this.playBtn.textContent = '⚠';
                 this.playBtn.disabled = true;
+            });
+
+            // Fetch as blob so the download works cross-origin (a plain
+            // <a download> would just open the file in the browser instead)
+            this.downloadBtn.addEventListener('click', async () => {
+                const src = this.audio.src;
+                const filename = decodeURIComponent(src.split('/').pop().split('?')[0]) || 'audio';
+                try {
+                    const response = await fetch(src);
+                    if (!response.ok) throw new Error('HTTP ' + response.status);
+                    const blob = await response.blob();
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = filename;
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
+                    URL.revokeObjectURL(url);
+                } catch (e) {
+                    console.error('Download failed, opening in new tab', e);
+                    window.open(src, '_blank');
+                }
             });
         }
     }
@@ -813,7 +870,7 @@
         init() {
             if (!this.pdfUrl || this.pdfUrl.endsWith('/')) {
                 console.error('Missing data for PdfViewerWidget: pdf-url not found.', this.container);
-                this.container.innerHTML = '<p style="color:red; font-size:12px;">Fehler: PDF URL fehlt.</p>';
+                this.container.innerHTML = '<p style="color:red; font-size:12px;">Fehler: PDF URL fehlt.<\/p>';
                 return;
             }
 
@@ -822,11 +879,11 @@
 
             const viewerHtml = `
                 <div class="pdf-actions">
-                    <a class="j-calltoaction-link j-calltoaction-link-style-1" data-action="button" href="${this.pdfUrl}" download data-title="Download">Download</a>
-                </div>
+                    <a class="j-calltoaction-link j-calltoaction-link-style-1" data-action="button" href="${this.pdfUrl}" download data-title="Download">Download<\/a>
+                <\/div>
                 <div class="pdf-pages">
-                    <div class="pdf-loading">Lade PDF…</div>
-                </div>
+                    <div class="pdf-loading">Lade PDF…<\/div>
+                <\/div>
             `;
 
             if (description) {
@@ -843,7 +900,7 @@
 
         showMessage(text, className) {
             this.pagesContainer.innerHTML =
-                '<div class="' + className + '">' + text + '</div>';
+                '<div class="' + className + '">' + text + '<\/div>';
         }
 
         async loadAndRender() {
