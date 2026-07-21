@@ -546,19 +546,27 @@
         }
     
         bindEvents() {
-            // Modified play/pause button event
             this.playBtn.addEventListener('click', () => {
                 if (this.audio.paused) {
-                    if (currentlyPlaying && currentlyPlaying !== this) {
-                        currentlyPlaying.pause();
-                    }
                     this.audio.play();
-                    this.playBtn.textContent = '⏸';
-                    currentlyPlaying = this;
                 } else {
-                    this.pause();
-                    currentlyPlaying = null;
+                    this.audio.pause();
                 }
+            });
+
+            // Coordination lives on the media events so it also covers
+            // playback started outside the button (media keys, lock screen)
+            this.audio.addEventListener('play', () => {
+                if (currentlyPlaying && currentlyPlaying !== this) {
+                    currentlyPlaying.pause();
+                }
+                currentlyPlaying = this;
+                this.playBtn.textContent = '⏸';
+            });
+
+            this.audio.addEventListener('pause', () => {
+                this.playBtn.textContent = '▶';
+                if (currentlyPlaying === this) currentlyPlaying = null;
             });
 
             // Rest of the existing event bindings...
@@ -704,13 +712,18 @@
         bindEvents() {
             // Video events
             this.video.addEventListener('play', () => {
+                if (currentlyPlaying && currentlyPlaying !== this) {
+                    currentlyPlaying.pause();
+                }
+                currentlyPlaying = this;
                 this.playBtn.textContent = '⏸';
                 this.updatePlayIcon();
             });
-    
+
             this.video.addEventListener('pause', () => {
                 this.playBtn.textContent = '▶';
                 this.updatePlayIcon();
+                if (currentlyPlaying === this) currentlyPlaying = null;
             });
             this.video.addEventListener('loadedmetadata', () => {
                 this.durationDisplay.textContent = this.formatTime(this.video.duration);
@@ -728,15 +741,9 @@
             // Play/Pause button
             this.playBtn.addEventListener('click', () => {
                 if (this.video.paused) {
-                    if (currentlyPlaying && currentlyPlaying !== this) {
-                        currentlyPlaying.pause();
-                    }
                     this.video.play();
-                    this.playBtn.textContent = '⏸';
-                    currentlyPlaying = this;
                 } else {
-                    this.pause();
-                    currentlyPlaying = null;
+                    this.video.pause();
                 }
             });
     
@@ -789,15 +796,9 @@
             const videoWrapper = this.container.querySelector('.video-wrapper');
             videoWrapper.addEventListener('click', () => {
                 if (this.video.paused) {
-                    if (currentlyPlaying && currentlyPlaying !== this) {
-                        currentlyPlaying.pause();
-                    }
                     this.video.play();
-                    this.playBtn.textContent = '⏸';
-                    currentlyPlaying = this;
                 } else {
-                    this.pause();
-                    currentlyPlaying = null;
+                    this.video.pause();
                 }
             });
     
